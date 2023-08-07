@@ -1,9 +1,7 @@
 import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import butter,filtfilt
 import scipy.signal as signal
-import sounddevice as sd
 import wave
 
 # Load the .wav file
