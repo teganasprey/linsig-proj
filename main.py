@@ -4,16 +4,24 @@ import numpy as np
 import scipy.signal as signal
 import wave
 
+# file path
+PATH = 'C:\\Users\\saspr\\source\\Python\\Tegan\\linsig-proj\\'
+
+# whether to do plots
+DO_PLOTS = False
+
 # Load the .wav file
-sampling_rate, audio_data = wavfile.read('/Users/teganasprey/Desktop/252_quote.wav')
+sampling_rate, audio_data = wavfile.read(PATH + '252_quote.wav')
 
 # Plot the time stream
 time = [i / sampling_rate for i in range(len(audio_data))]
-plt.plot(time, audio_data)
-plt.xlabel('Time (seconds)')
-plt.ylabel('Amplitude')
-plt.title('Voice Recording')
-plt.show()
+
+if DO_PLOTS:
+    plt.plot(time, audio_data)
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.title('Voice Recording')
+    plt.show()
 
 duration = len(audio_data) / sampling_rate
 print(f"Sampling rate: {sampling_rate} Hz")
@@ -35,14 +43,15 @@ if len(audio_data.shape) == 2:
     print("Audio is stereo. Keeping only the left channel.")
 
 time_preprocessed = [i / sampling_rate for i in range(len(audio_data))]
-plt.figure()
-plt.plot(time_preprocessed, audio_data, label='Preprocessed Audio', color='orange')
-plt.xlabel('Time (seconds)')
-plt.ylabel('Amplitude')
-plt.title('Preprocessed Audio Stream')
-plt.legend()
 
-plt.show()
+if DO_PLOTS:
+    plt.figure()
+    plt.plot(time_preprocessed, audio_data, label='Preprocessed Audio', color='orange')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.title('Preprocessed Audio Stream')
+    plt.legend()
+    plt.show()
 
 
 # Function to apply band-pass filter
@@ -66,7 +75,7 @@ def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
 
 
 # Load the audio file (replace 'input.wav' with your input file)
-input_filename = '/Users/teganasprey/Desktop/252_quote.wav'
+input_filename = PATH + '252_quote.wav'
 with wave.open(input_filename, 'rb') as wf:
     num_frames = wf.getnframes()
     audio_data = np.frombuffer(wf.readframes(num_frames), dtype=np.int16)
