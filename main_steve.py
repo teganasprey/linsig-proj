@@ -6,25 +6,11 @@ import wave
 
 
 # Function to synthesize sine-waves for each band and superimpose them
-def synthesize_bands(filtered_chunks, rms_values, sampling_rate):
-    duration_per_chunk = len(filtered_chunks[0]) / sampling_rate
-    synthesized_chunks = []
-
-    for chunk_idx in range(len(filtered_chunks)//len(center_frequencies)):
-        t_chunk = np.linspace(0, duration_per_chunk, len(filtered_chunks[0]))
-        synthesized_chunk = np.zeros_like(filtered_chunks[0])
-
-        for i in range(len(center_frequencies)):
-            center_frequency = center_frequencies[i]
-            rms_value = rms_values[i]
-            amplitude = rms_value
-            t = t_chunk
-            band_wave = amplitude * np.sin(2 * np.pi * center_frequency * t)
-            synthesized_chunk += band_wave
-
-        synthesized_chunks.append(synthesized_chunk)
-
-    return synthesized_chunks
+def synthesize_chunk(chunk, rms, center_freq, sampling_rate, time):
+    times = np.arange(time, time + len(chunk)) / sampling_rate
+    band_wave = np.sin(2 * np.pi * center_freq * times)
+    amplitude = rms * band_wave
+    return amplitude
 
 
 # Function to apply band-pass filter
@@ -87,20 +73,19 @@ chunks = time_segmentation(audio_data, sampling_rate, chunk_size_ms)
 center_frequencies = [100+50*i for i in range(150)]
 bandwidth = 100
 
-################################################
-# break this up and loop over chunks
-
-# Apply band-pass filter to each chunk and store the filtered chunks
-filtered_chunks = [apply_bandpass_filter(chunk, sampling_rate, center_freq, bandwidth) for center_freq in center_frequencies for chunk in chunks]
-
-# Calculate the RMS value for each band
-rms_values = [np.sqrt(np.mean(chunk**2)) for chunk in filtered_chunks]
-
-# Synthesize the bands and superimpose them for each chunk
-synthesized_chunks = synthesize_bands(filtered_chunks, rms_values, sampling_rate)
-
-###############################################
-
+synthesized_chunks = []
+rms_values = []
+for chunk in chunks:
+    filter_chunks = []
+    for i, center_freq in enumerate(center_frequencies):
+        time = len(chunks[0]) * i
+        filtered_chunk = apply_bandpass_filter(chunk, sampling_rate, center_freq, bandwidth)
+        rms = np.sqrt(np.mean(filtered_chunk ** 2))
+        rms_values.append(rms)
+        # Synthesize the bands and superimpose them for each chunk
+        synthesized_chunk = synthesize_chunk(chunk, rms, center_freq, sampling_rate, time)
+        filter_chunks.append(synthesized_chunk)
+    synthesized_chunks.append(np.sum(filter_chunks, axis=0))
 
 # Concatenate the synthesized chunks to obtain the final output stream
 output_stream = np.concatenate(synthesized_chunks)
