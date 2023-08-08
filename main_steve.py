@@ -46,7 +46,7 @@ def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
     num_chunks = len(audio_data) // chunk_size_samples
     chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks)]
     if (num_chunks * chunk_size_samples) < len(audio_data):
-        chunks.append(audio_data[chunk_size_samples * num_chunks + 1:-1])
+        chunks.append(audio_data[chunk_size_samples * num_chunks:-1])
     return chunks
 
 
