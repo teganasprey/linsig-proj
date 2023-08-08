@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as signal
 import wave
+from scipy.signal import spectrogram
 
 
 # Function to synthesize sine-waves for each band and superimpose them
@@ -43,7 +44,7 @@ PATH = './'
 DO_PLOTS = False
 
 # Load the .wav file
-sampling_rate, audio_data = wavfile.read(PATH + 'output_16khz.wav')
+sampling_rate, audio_data, original_data = wavfile.read(PATH + 'output_16khz.wav')
 
 if len(audio_data.shape) == 2:
     audio_data = audio_data[:, 0]  # Keep only the first channel (left channel)
