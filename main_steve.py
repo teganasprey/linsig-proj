@@ -79,8 +79,11 @@ for chunk in chunks:
     filter_chunks = []
     for i, center_freq in enumerate(center_frequencies):
         time = len(chunks[0]) * i
+        # Apply the band pass filter to the chunk
         filtered_chunk = apply_bandpass_filter(chunk, sampling_rate, center_freq, bandwidth)
+        # Calculate the RMS of the filtered chunk
         rms = np.sqrt(np.mean(filtered_chunk ** 2))
+        # For recording the RMS values for analysis
         rms_values.append(rms)
         # Synthesize the bands and superimpose them for each chunk
         synthesized_chunk = synthesize_chunk(chunk, rms, center_freq, sampling_rate, time)
