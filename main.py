@@ -4,6 +4,49 @@ import numpy as np
 import scipy.signal as signal
 import wave
 
+
+# Function to synthesize sine-waves for each band and superimpose them
+def synthesize_bands(filtered_chunks, rms_values, sampling_rate):
+    duration_per_chunk = len(filtered_chunks[0]) / sampling_rate
+    synthesized_chunks = []
+
+    for chunk_idx in range(len(filtered_chunks)//len(center_frequencies)):
+        t_chunk = np.linspace(0, duration_per_chunk, len(filtered_chunks[0]))
+        synthesized_chunk = np.zeros_like(filtered_chunks[0])
+
+        for i in range(len(center_frequencies)):
+            center_frequency = center_frequencies[i]
+            rms_value = rms_values[i]
+            amplitude = rms_value
+            t = t_chunk
+            band_wave = amplitude * np.sin(2 * np.pi * center_frequency * t)
+            synthesized_chunk += band_wave
+
+        synthesized_chunks.append(synthesized_chunk)
+
+    return synthesized_chunks
+
+
+# Function to apply band-pass filter
+def apply_bandpass_filter(audio_data, sampling_rate, center_frequency, bandwidth):
+    nyquist = 0.5 * sampling_rate
+    low = center_frequency - 0.5 * bandwidth
+    high = center_frequency + 0.5 * bandwidth
+    low = low / nyquist
+    high = high / nyquist
+    b, a = signal.butter(5, [low, high], btype='band')
+    filtered_chunk = signal.lfilter(b, a, audio_data)
+    return filtered_chunk
+
+
+# Function for time segmentation
+def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
+    chunk_size_samples = int(sampling_rate * chunk_size_ms / 1000)
+    num_chunks = len(audio_data) // chunk_size_samples
+    chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks)]
+    return chunks
+
+
 # file path
 PATH = '/Users/teganasprey/Desktop/'
 
@@ -28,39 +71,11 @@ if DO_PLOTS:
     plt.legend()
     plt.show()
 
-
-# Function to apply band-pass filter
-def apply_bandpass_filter(audio_data, sampling_rate, center_frequency, bandwidth):
-    nyquist = 0.5 * sampling_rate
-    low = center_frequency - 0.5 * bandwidth
-    high = center_frequency + 0.5 * bandwidth
-    low = low / nyquist
-    high = high / nyquist
-    b, a = signal.butter(5, [low, high], btype='band')
-    filtered_chunk = signal.lfilter(b, a, audio_data)
-    return filtered_chunk
-
-
-# Function for time segmentation
-def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
-    chunk_size_samples = int(sampling_rate * chunk_size_ms / 1000)
-    num_chunks = len(audio_data) // chunk_size_samples
-    chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks)]
-    return chunks
-
-# Load the audio file (replace 'input.wav' with your input file)
-#input_filename = PATH + '252_quote.wav'
-#with wave.open(input_filename, 'rb') as wf:
-#    num_frames = wf.getnframes()
- #   audio_data = np.frombuffer(wf.readframes(num_frames), dtype=np.int16)
-#    sampling_rate = wf.getframerate()
-
-
 # Ensure mono audio
 if len(audio_data.shape) > 1:
     audio_data = np.mean(audio_data, axis=1)
 
-chunk_size_ms = 30
+chunk_size_ms = 40
 
 # Divide the audio data into chunks
 chunks = time_segmentation(audio_data, sampling_rate, chunk_size_ms)
@@ -74,29 +89,6 @@ filtered_chunks = [apply_bandpass_filter(chunk, sampling_rate, center_freq, band
 
 # Calculate the RMS value for each band
 rms_values = [np.sqrt(np.mean(chunk**2)) for chunk in filtered_chunks]
-
-
-# Function to synthesize sine-waves for each band and superimpose them
-def synthesize_bands(filtered_chunks, rms_values, sampling_rate):
-    duration_per_chunk = len(filtered_chunks[0]) / sampling_rate
-    synthesized_chunks = []
-
-    for chunk_idx in range(len(filtered_chunks)//len(center_frequencies)):
-        t_chunk = np.linspace(0, duration_per_chunk, len(filtered_chunks[0]))
-        synthesized_chunk = np.zeros_like(filtered_chunks[0])
-
-        for i in range(len(center_frequencies)):
-            center_frequency = center_frequencies[i]
-            rms_value = rms_values[i]
-            amplitude = rms_value
-            t = t_chunk
-            band_wave = amplitude * np.sin(2 * np.pi * center_frequency * t)
-            synthesized_chunk += band_wave
-
-        synthesized_chunks.append(synthesized_chunk)
-
-    return synthesized_chunks
-
 
 # Synthesize the bands and superimpose them for each chunk
 synthesized_chunks = synthesize_bands(filtered_chunks, rms_values, sampling_rate)
