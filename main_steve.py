@@ -28,7 +28,7 @@ def synthesize_bands(filtered_chunks, rms_values, sampling_rate):
 
 
 # Function to apply band-pass filter
-def apply_bandpass_filter(audio_data, sampling_rate, center_frequency, bandwidth):
+def apply_bandpass_filter(chunk_data, sampling_rate, center_frequency, bandwidth):
     low = center_frequency - 0.5 * bandwidth
     high = center_frequency + 0.5 * bandwidth
     f = signal.butter(3,
@@ -36,7 +36,7 @@ def apply_bandpass_filter(audio_data, sampling_rate, center_frequency, bandwidth
                       btype='bandpass',
                       output='sos',
                       fs=sampling_rate)
-    filtered_chunk = signal.sosfilt(f, audio_data)
+    filtered_chunk = signal.sosfilt(f, chunk_data)
     return filtered_chunk
 
 
@@ -87,6 +87,9 @@ chunks = time_segmentation(audio_data, sampling_rate, chunk_size_ms)
 center_frequencies = [100+50*i for i in range(150)]
 bandwidth = 100
 
+################################################
+# break this up and loop over chunks
+
 # Apply band-pass filter to each chunk and store the filtered chunks
 filtered_chunks = [apply_bandpass_filter(chunk, sampling_rate, center_freq, bandwidth) for center_freq in center_frequencies for chunk in chunks]
 
@@ -95,6 +98,9 @@ rms_values = [np.sqrt(np.mean(chunk**2)) for chunk in filtered_chunks]
 
 # Synthesize the bands and superimpose them for each chunk
 synthesized_chunks = synthesize_bands(filtered_chunks, rms_values, sampling_rate)
+
+###############################################
+
 
 # Concatenate the synthesized chunks to obtain the final output stream
 output_stream = np.concatenate(synthesized_chunks)
@@ -105,6 +111,7 @@ with wave.open(output_filename, 'wb') as wf:
     wf.setnchannels(1)  # Mono audio
     wf.setsampwidth(2)  # 2 bytes per sample (16-bit audio)
     wf.setframerate(sampling_rate)
+    wf.setnframes(len(output_stream))
     wf.writeframes(output_stream.astype(np.int16).tobytes())
 
 
