@@ -5,38 +5,13 @@ import scipy.signal as signal
 import wave
 
 # file path
-PATH = 'C:\\Users\\saspr\\source\\Python\\Tegan\\linsig-proj\\'
+PATH = '/Users/teganasprey/Desktop/'
 
 # whether to do plots
 DO_PLOTS = False
 
 # Load the .wav file
-sampling_rate, audio_data = wavfile.read(PATH + '252_quote.wav')
-
-# Plot the time stream
-time = [i / sampling_rate for i in range(len(audio_data))]
-
-if DO_PLOTS:
-    plt.plot(time, audio_data)
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Amplitude')
-    plt.title('Voice Recording')
-    plt.show()
-
-duration = len(audio_data) / sampling_rate
-print(f"Sampling rate: {sampling_rate} Hz")
-print(f"Duration: {duration} seconds")
-
-target_sampling_rate = 16000
-if sampling_rate > target_sampling_rate:
-    from scipy.signal import resample
-
-    audio_data = resample(audio_data, int(len(audio_data) * target_sampling_rate / sampling_rate))
-    sampling_rate = target_sampling_rate
-
-    # Update the duration after down-sampling
-    duration = len(audio_data) / sampling_rate
-    print("Audio down-sampled to 16 kHz.")
+sampling_rate, audio_data = wavfile.read(PATH + 'output_16khz.wav')
 
 if len(audio_data.shape) == 2:
     audio_data = audio_data[:, 0]  # Keep only the first channel (left channel)
@@ -73,13 +48,13 @@ def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
     chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks)]
     return chunks
 
-
 # Load the audio file (replace 'input.wav' with your input file)
-input_filename = PATH + '252_quote.wav'
-with wave.open(input_filename, 'rb') as wf:
-    num_frames = wf.getnframes()
-    audio_data = np.frombuffer(wf.readframes(num_frames), dtype=np.int16)
-    sampling_rate = wf.getframerate()
+#input_filename = PATH + '252_quote.wav'
+#with wave.open(input_filename, 'rb') as wf:
+#    num_frames = wf.getnframes()
+ #   audio_data = np.frombuffer(wf.readframes(num_frames), dtype=np.int16)
+#    sampling_rate = wf.getframerate()
+
 
 # Ensure mono audio
 if len(audio_data.shape) > 1:
