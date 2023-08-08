@@ -42,8 +42,10 @@ def apply_bandpass_filter(audio_data, sampling_rate, center_frequency, bandwidth
 # Function for time segmentation
 def time_segmentation(audio_data, sampling_rate, chunk_size_ms):
     chunk_size_samples = int(sampling_rate * chunk_size_ms / 1000)
-    num_chunks = len(audio_data) // chunk_size_samples
-    chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks)]
+    num_chunks = (len(audio_data) // chunk_size_samples) + 1
+    chunks = [audio_data[i*chunk_size_samples:(i+1)*chunk_size_samples] for i in range(num_chunks-1)]
+    if (num_chunks*chunk_size_samples)<len(audio_data):
+        chunks.append(audio_data[chunk_size_samples*num_chunks + 1:len(audio_data-1)])
     return chunks
 
 
