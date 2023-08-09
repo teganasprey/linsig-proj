@@ -2,7 +2,7 @@ import wave
 import numpy as np
 
 # Load the original WAV file
-input_filename = "/Users/teganasprey/Desktop/252_quote.wav"
+input_filename = "./252_quote.wav"
 output_filename = "output_16khz.wav"
 with wave.open(input_filename, 'rb') as wf:
     n_channels = wf.getnchannels()

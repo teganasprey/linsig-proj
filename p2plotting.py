@@ -1,9 +1,6 @@
 import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as signal
-import wave
-from scipy.signal import spectrogram
 
 original_file = './output_16khz.wav'
 processed_file = './output.wav'
